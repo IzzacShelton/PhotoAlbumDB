@@ -10,17 +10,6 @@ create table Tags(
 	TagType varchar(64)
 );
 
-# create the photo table 
-create table Photo(
-	PhotoID int auto_increment primary key,
-	Filepath varchar(256) unique,
-	Latitude decimal(8,6),
-	Longitude decimal(9,6),
-	ImageWidth int unsigned,
-	ImageHeight int unsigned,
-	DateTimeAdded datetime default current_timestamp
-);
-
 # create the user table
 create table Users (
 	UserId int auto_increment,
@@ -29,18 +18,6 @@ create table Users (
 	DateJoined datetime default current_timestamp(),
 	constraint users_pk primary key (UserId),
 	constraint users_email_uk unique (Email)
-);
-
-# create the album table
-CREATE TABLE Album (
-	AlbumID INT AUTO_INCREMENT PRIMARY KEY,
-	OwnerID INT,
-	AlbumName VARCHAR(255),
-	AlbumDescription TEXT,
-	CreatedAt DATETIME,
-	AlbumUpdated DATETIME,
-	FOREIGN KEY (OwnerID)
-		REFERENCES Users(UserID)
 );
 
 # create the camera table
@@ -55,6 +32,37 @@ create table Camera (
 	constraint camera_users_fk foreign key (UserId)
 		references Users(UserId)
 );
+
+# create the photo table 
+create table Photo(
+	PhotoID int auto_increment primary key,
+	CameraID int,
+	Filepath varchar(256) unique,
+	Latitude decimal(8,6),
+	Longitude decimal(9,6),
+	ImageWidth int unsigned,
+	ImageHeight int unsigned,
+	DateTimeAdded datetime default current_timestamp,
+	
+	foreign key (CameraID) 
+		references Camera(CameraID)
+);
+
+
+
+# create the album table
+CREATE TABLE Album (
+	AlbumID INT AUTO_INCREMENT PRIMARY KEY,
+	OwnerID INT,
+	AlbumName VARCHAR(255),
+	AlbumDescription TEXT,
+	CreatedAt DATETIME,
+	AlbumUpdated DATETIME,
+	FOREIGN KEY (OwnerID)
+		REFERENCES Users(UserID)
+);
+
+
 
 # display the table structures
 describe Tags;
