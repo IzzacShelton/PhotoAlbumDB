@@ -4,7 +4,7 @@ use PhotoApp;
 
 # create the photo table 
 create table Tags(
-	TagID serial primary key,
+	TagID int auto_increment primary key,
 	Title varchar(64) not null unique,
 	TagColor mediumint unsigned default 0xFFFFFF, -- Default to 'white'
 	TagType varchar(64)
@@ -12,7 +12,7 @@ create table Tags(
 
 # create the photo table 
 create table Photo(
-	PhotoID serial primary key,
+	PhotoID int auto_increment primary key,
 	Filepath varchar(256) unique,
 	Latitude decimal(8,6),
 	Longitude decimal(9,6),
@@ -33,7 +33,7 @@ create table Users (
 
 # create the album table
 CREATE TABLE Album (
-	AlbumID INT PRIMARY KEY,
+	AlbumID INT AUTO_INCREMENT PRIMARY KEY,
 	OwnerID INT,
 	AlbumName VARCHAR(255),
 	AlbumDescription TEXT,
