@@ -26,11 +26,8 @@ create table Camera (
 	Brand varchar(100) not null,
 	Model varchar(100) not null,
 	SerialNumber varchar(100),
-	UserId int not null,
 	constraint camera_pk primary key (CameraId),
-	constraint camera_serialnumber_uk unique (SerialNumber),
-	constraint camera_users_fk foreign key (UserId)
-		references Users(UserId)
+	constraint camera_serialnumber_uk unique (SerialNumber)
 );
 
 # create the photo table 
@@ -38,6 +35,7 @@ create table Photo(
 	PhotoID int auto_increment primary key,
 	CameraID int,
 	Filepath varchar(256) unique,
+	FileSize bigint,
 	Latitude decimal(8,6),
 	Longitude decimal(9,6),
 	ImageWidth int unsigned,
@@ -47,8 +45,6 @@ create table Photo(
 	foreign key (CameraID) 
 		references Camera(CameraID)
 );
-
-
 
 # create the album table
 CREATE TABLE Album (
@@ -61,8 +57,6 @@ CREATE TABLE Album (
 	FOREIGN KEY (OwnerID)
 		REFERENCES Users(UserID)
 );
-
-
 
 # display the table structures
 describe Tags;
