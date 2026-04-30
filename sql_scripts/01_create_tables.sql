@@ -40,6 +40,7 @@ create table Photo(
 	Longitude decimal(9,6),
 	ImageWidth int unsigned,
 	ImageHeight int unsigned,
+	DateTimeTaken datetime,
 	DateTimeAdded datetime default current_timestamp,
 	
 	foreign key (CameraID) 
