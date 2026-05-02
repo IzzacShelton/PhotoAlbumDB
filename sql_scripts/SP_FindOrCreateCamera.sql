@@ -11,6 +11,7 @@ Begin
     SELECT CameraID INTO p_CameraID
     FROM Camera
     WHERE SerialNumber = p_SerialNumber
+	  OR (Brand = p_Brand AND Model = p_Model)
     LIMIT 1;
 
     -- If not found, insert new camera
