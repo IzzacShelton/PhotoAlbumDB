@@ -53,8 +53,8 @@ CREATE TABLE Album (
 	OwnerID INT,
 	AlbumName VARCHAR(255),
 	AlbumDescription TEXT,
-	CreatedAt DATETIME,
 	AlbumType Enum('Library', 'Auto', 'User'),
+	CreatedAt DATETIME default current_timestamp,
 	AlbumUpdated DATETIME,
 
 	FOREIGN KEY (OwnerID)
