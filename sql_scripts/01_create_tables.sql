@@ -14,10 +14,9 @@ create table Tags(
 create table Users (
 	UserId int auto_increment,
 	Name varchar(100) not null,
-	Email varchar(100) not null,
+	Email varchar(100) null,
 	DateJoined datetime default current_timestamp(),
-	constraint users_pk primary key (UserId),
-	constraint users_email_uk unique (Email)
+	constraint users_pk primary key (UserId)
 );
 
 # create the camera table
@@ -27,7 +26,8 @@ create table Camera (
 	Model varchar(100) not null,
 	SerialNumber varchar(100),
 	constraint camera_pk primary key (CameraId),
-	constraint camera_serialnumber_uk unique (SerialNumber)
+	constraint camera_serialnumber_uk unique (SerialNumber),
+	constraint camera_brand_model_uk unique (Brand, Model)
 );
 
 # create the photo table 
@@ -54,7 +54,9 @@ CREATE TABLE Album (
 	AlbumName VARCHAR(255),
 	AlbumDescription TEXT,
 	CreatedAt DATETIME,
+	AlbumType Enum('Library', 'Auto', 'User'),
 	AlbumUpdated DATETIME,
+
 	FOREIGN KEY (OwnerID)
 		REFERENCES Users(UserID)
 );

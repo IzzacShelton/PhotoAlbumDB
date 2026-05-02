@@ -1,25 +1,26 @@
 use PhotoApp;
-
-# PhotoTag_Int
+ 
+# PhotoTag_Int - Salina
 create table PhotoTag (
     PhotoID int,
     TagID int,
     primary key (PhotoID, TagID),
     foreign key (PhotoID) references Photo(PhotoID),
     foreign key (TagID) references Tags(TagID)
+      on delete cascade
 );
 
-# AlbumPhoto_Int
+# AlbumPhoto_Int - Emily
 Create table Album_Photo (
-  AlbumID INT, 
+  AlbumID INT on delete cascade, 
   PhotoID int,
-
   primary key (AlbumID, PhotoID),
-  foreign key (AlbumID) References Album(AlbumID),
+  foreign key (AlbumID) References Album(AlbumID)
+  	on delete cascade,
   foreign key (PhotoID) References Photo(PhotoID)
 );
 
-# AlbumShares
+# AlbumShares - Izzac
 CREATE TABLE AlbumShares(
   ReceiverID int,
   AlbumID int,
