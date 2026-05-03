@@ -1,17 +1,17 @@
 DELIMITER //
 
 Create Procedure FindOrCreateCamera(
-	IN p_Brand VARCHAR(100),
+    IN p_Brand VARCHAR(100),
     IN p_Model VARCHAR(100),
     IN p_SerialNumber VARCHAR(100),
     OUT p_CameraID INT
     )
 Begin
-	-- Try to find existing camera using SerialNumber
+    -- Try to find existing camera using SerialNumber
     SELECT CameraID INTO p_CameraID
     FROM Camera
-    WHERE SerialNumber = p_SerialNumber
-	  OR (Brand = p_Brand AND Model = p_Model)
+    WHERE SerialNumber <=> p_SerialNumber
+      OR (Brand = p_Brand AND Model = p_Model)
     LIMIT 1;
 
     -- If not found, insert new camera
