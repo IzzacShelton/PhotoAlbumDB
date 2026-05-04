@@ -35,7 +35,7 @@ public final class DatabaseManager {
    */
   public static UserRecord findOrCreateUser(String username) throws SQLException {
     String insIgnoreUser = "insert ignore into Users (Name) values (?);",
-            selectUserRow = "select * from Users where Name = ? limit 1;";
+           selectUserRow = "select * from Users where Name = ? limit 1;";
     try ( // ugly syntax but Its required to close them automatically
             Connection con = getConnection(); 
             PreparedStatement ins = con.prepareStatement(insIgnoreUser); 
@@ -44,10 +44,10 @@ public final class DatabaseManager {
         // format username into queries
         ins.setString(1, username);
         sel.setString(1, username);
-
+        
         // inserts the new user record if its not already there
         ins.execute();
-
+        
         // submit query + select the row
         ResultSet rs = sel.executeQuery();
         rs.next();
@@ -82,8 +82,28 @@ public final class DatabaseManager {
    * Creates a new User album
    */
   public static AlbumRecord createAlbum(int ownerId, String name, String description) throws SQLException {
-    
-    throw new UnsupportedOperationException("createAlbum not yet implemented");
+    String 
+        insAlbum = """
+            insert into Album (OwnerID, AlbumName, AlbumDescription, AlbumType) 
+              values (?, ?, ?, 'User');""",
+        selAlbum = """
+            select * from Album
+            where AlbumID = last_insert_id();""";
+    try (Connection con = getConnection();
+         PreparedStatement ins = con.prepareStatement(insAlbum);
+         PreparedStatement sel = con.prepareStatement(selAlbum)) {
+        
+        // set insert params;
+        ins.setInt(1, ownerId);
+        ins.setString(2, name);
+        ins.setString(3, description);
+        ins.execute();
+        
+        ///
+        ResultSet rs = sel.executeQuery();
+        rs.next();
+        return mapAlbum(rs);
+    } 
   }
 
   /**
@@ -91,8 +111,15 @@ public final class DatabaseManager {
    * (AlbumType='User')
    */
   public static void deleteAlbum(int albumId) throws SQLException {
-    
-    throw new UnsupportedOperationException("deleteAlbum not yet implemented");
+    String delAlbum = """
+        delete from Album
+        where AlbumID = ? and AlbumType = 'User';
+        """;
+    try (Connection con = getConnection();
+         PreparedStatement del = con.prepareStatement(delAlbum)) {
+        del.setInt(1, albumId);
+        del.execute();
+    } 
   }
 
   /**
@@ -100,80 +127,124 @@ public final class DatabaseManager {
    * the album is empty.
    */
   public static String getRandomThumbnailPath(int albumId) throws SQLException {
-    String selectRandom = "select Filepath from Photo where AlbumID = ? order by rand() limit 1";
-    try (
-            Connection con = getConnection(); 
-            PreparedStatement sel = con.prepareStatement(selectRandom);
-        ) {
-        
+    String selThumb = """
+        select Filepath 
+        from Photo P join  Album_Photo AP 
+          on P.PhotoID = AP.PhotoID
+          where AlbumID = ?
+        order by rand()
+        limit 1;
+    """;
+    try (Connection con = getConnection();
+         PreparedStatement sel = con.prepareStatement(selThumb)) {
         sel.setInt(1, albumId);
-        ResultSet rs = sel.executeQuery();
-        rs.next();
+        ResultSet r = sel.executeQuery();
+        r.next();
         
-        return rs.getString("Filepath");
-    }
+        return r.getString("Filepath");
+    } 
   }
 
   /**
    * Returns the number of photos in an album.
    */
   public static int getPhotoCount(int albumId) throws SQLException {
-    String selGetCount = "select photo_count(?) as ct;";
-    try (
-            Connection con = getConnection(); 
-            PreparedStatement sel = con.prepareStatement(selGetCount);
-        ) {
+    String selCount = "select fn_PhotoCount(?) as ct;";
+            
+    try (Connection con = getConnection();
+         PreparedStatement sel = con.prepareStatement(selCount)) {
         sel.setInt(1, albumId);
-        ResultSet rs = sel.executeQuery();
-        rs.next();
+        ResultSet r = sel.executeQuery();
+        r.next();
         
-        return rs.getInt("ct");
-    }
+        return r.getInt("ct");
+    } 
   }
 
   /**
    * Returns all photos in an album sorted by date taken, then date added.
    */
   public static List<PhotoRecord> getPhotosInAlbum(int albumId) throws SQLException {
-    String selectPhotos = """
-        select * 
-        from Photo P 
-            join (
-                select AlbumID 
-                from AlbumPhoto
-                where AlbumID = ?
-            ) as S 
-        on P.AlbumID = S.AlbumID""";
-    try (
-            Connection con = getConnection(); 
-            PreparedStatement sel = con.prepareStatement(selectPhotos);
-        ) {
+    String selPhotos = """
+        select P.* 
+        from Photo P join  Album_Photo AP 
+          on P.PhotoID = AP.PhotoID
+          where AlbumID = ?
+        order by P.DateTimeTaken, P.DateTimeAdded;
+    """;
+    try (Connection con = getConnection();
+         PreparedStatement sel = con.prepareStatement(selPhotos)) {
         sel.setInt(1, albumId);
+        
         ResultSet rs = sel.executeQuery();
         
         List<PhotoRecord> photos = new ArrayList<>();
         while (rs.next()) {
             photos.add(mapPhoto(rs));
         }
+        
         return photos;
-    }
+    } 
   }
 
   /**
    * Returns all photos in an album that have a specific tag applied.
    */
-  public static List<PhotoRecord> getPhotosInAlbumByTag(int albumId, int tagId)
-         throws SQLException {
-    
-    throw new UnsupportedOperationException("getPhotosInAlbumByTag not yet implemented");
+  public static List<PhotoRecord> getPhotosInAlbumByTag(int albumId, int tagId) throws SQLException {
+    String selPhoByTag = """
+        select P.*
+        from 
+          Photo P join (
+            select PhotoID, TagID, AlbumID
+            from Album_Photo AP join Photo_Tag PT
+            on AP.PhotoID = PT.PhotoID
+          ) J on J.PhotoID = P.PhotoID
+        where AlbumID = ?
+          and TagID = ?;
+    """;
+    try (Connection con = getConnection();
+         PreparedStatement sel = con.prepareStatement(selPhoByTag)) {
+        sel.setInt(1, albumId);
+        sel.setInt(2, tagId);
+        ResultSet rs = sel.executeQuery();
+        
+        List<PhotoRecord> photos = new ArrayList<>();
+        while (rs.next()) {
+            photos.add(mapPhoto(rs));
+        }
+        
+        return photos;
+    } 
   }
 
   /**
    * Imports a photo into the database from an extracted PhotoMetadata record.
    */
   public static PhotoRecord importPhoto(PhotoMetadata meta, int userId) throws SQLException {
-    // TODO
-    throw new UnsupportedOperationException("importPhoto not yet implemented");
+    String callIns = "call sp_InsertPhoto(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"; // oh the setters...
+    
+    try (Connection con = getConnection();
+         PreparedStatement ins = con.prepareStatement(callIns)) {
+        // sp_InsertPhoto(int, String, long, Double, Double, int, int, LocalDateTime, String, String, String); 
+        ins.setInt(1, userId);                  // in u_UserID int,
+        ins.setString(2, meta.filepath());      // in p_Filepath varchar(256),
+        ins.setLong(3, meta.fileSize());        // in p_FileSize bigint,
+        ins.setDouble(4, meta.latitude());      // in p_Latitude decimal(8,6),
+        ins.setDouble(5, meta.longitude());     // in p_Longitude decimal(9,6),
+        ins.setInt(6, meta.imageWidth());       // in p_ImageWidth int unsigned,
+        ins.setInt(7, meta.imageHeight());      // in p_ImageHeight int unsigned,
+        ins.setObject(8, meta.dateTimeTaken()); // in p_DateTimeTaken datetime,
+        ins.setString(8, meta.cameraBrand());   // in c_Brand varchar(100),
+        ins.setString(9, meta.cameraModel());   // in c_Model varchar(100),
+        ins.setString(10, meta.cameraSerial()); // in c_SerialNumber varchar(100)
+
+        // the procedure ends with a select of the new record, so executeQuery should return the row
+        // provided the JDBC behaves... 
+        ResultSet rs = ins.executeQuery();
+        rs.next();
+        
+        return mapPhoto(rs);
+    } 
   }
 
   /**
@@ -181,34 +252,82 @@ public final class DatabaseManager {
    * record already exists (INSERT IGNORE)
    */
   public static void addPhotoToAlbum(int albumId, int photoId) throws SQLException {
-    // TODO
-    throw new UnsupportedOperationException("addPhotoToAlbum not yet implemented");
+    String insPhoto = """
+        insert ignore into Album_Photo (AlbumID, PhotoID)
+          values (?, ?);
+    """;
+    try (Connection con = getConnection();
+         PreparedStatement ins = con.prepareStatement(insPhoto)) {
+        ins.setInt(1, albumId);
+        ins.setInt(2, photoId);
+        
+        // run it
+        ins.execute();
+    } 
   }
 
   /**
    * Removes a photo from a User album without deleting the Photo row itself.
    */
   public static void removePhotoFromAlbum(int albumId, int photoId) throws SQLException {
-    // TODO
-    throw new UnsupportedOperationException("removePhotoFromAlbum not yet implemented");
+    String callRemove = "{call sp_RemovePhotoFromAlbum(?, ?);}";
+    try (Connection con = getConnection();
+         PreparedStatement call = con.prepareCall(callRemove)) {
+        call.setInt(1, albumId);
+        call.setInt(2, photoId);
+        
+        call.execute();
+    } 
   }
 
   /**
    * Returns all tags ordered alphabetically.
    */
   public static List<TagRecord> getAllTags() throws SQLException {
-    // TODO
-    throw new UnsupportedOperationException("getAllTags not yet implemented");
+    String selTags = """
+        select * 
+        from Tags 
+        order by Title;
+    """;
+    try (Connection con = getConnection();
+         PreparedStatement sel = con.prepareStatement(selTags)) {
+        ResultSet rs = sel.executeQuery();
+        
+        List<TagRecord> tags = new ArrayList<>();
+        while (rs.next()) {
+            tags.add(mapTag(rs));
+        }
+        
+        return tags;
+    } 
   }
 
   /**
    * Creates a new custom tag. Color is stored as an RGB int (e.g. 0xFFFFFF).
    * TagType can be null.
    */
-  public static TagRecord createTag(String title, int color, String tagType)
-          throws SQLException {
-    // TODO
-    throw new UnsupportedOperationException("createTag not yet implemented");
+  public static TagRecord createTag(String title, int color, String tagType) throws SQLException {
+    String 
+        insTag = """
+            insert into Tags (Title, TagColor, TagType)
+              values (?, ?, ?);""",
+        selTag = """
+            select * from Tags
+            where TagID = last_insert_id();""";
+    try (Connection con = getConnection();
+         PreparedStatement ins = con.prepareStatement(insTag);
+         PreparedStatement sel = con.prepareStatement(selTag)) {
+        
+        // set insert params;
+        ins.setString(1, title);
+        ins.setInt(2, color);
+        ins.setString(3, tagType);
+        ins.execute();
+        
+        ResultSet rs = sel.executeQuery();
+        rs.next();
+        return mapTag(rs);
+    } 
   }
 
   /**
@@ -216,32 +335,74 @@ public final class DatabaseManager {
    * either via ON DELETE CASCADE on PhotoTag.TagID or an explicit delete.
    */
   public static void deleteTag(int tagId) throws SQLException {
-    // TODO
-    throw new UnsupportedOperationException("deleteTag not yet implemented");
+    String delTag = """
+        delete from Tags 
+        where TagID = ?;
+    """;
+    try (Connection con = getConnection();
+         PreparedStatement del = con.prepareStatement(delTag)) {
+        del.setInt(1, tagId);
+        del.execute();
+    } 
   }
 
   /**
    * Applies a tag to a photo. Does nothing if already applied (INSERT IGNORE)
    */
   public static void tagPhoto(int photoId, int tagId) throws SQLException {
-    // TODO
-    throw new UnsupportedOperationException("tagPhoto not yet implemented");
+    String insPhotoTag = """
+        insert ignore into Photo_Tag (PhotoID, TagID)
+          values (?, ?);
+    """;
+    try (Connection con = getConnection();
+         PreparedStatement ins = con.prepareStatement(insPhotoTag)) {
+        ins.setInt(1, photoId);
+        ins.setInt(2, tagId);
+        
+        ins.execute();
+    } 
   }
 
   /**
    * Removes a tag from a photo.
    */
   public static void untagPhoto(int photoId, int tagId) throws SQLException {
-    // TODO
-    throw new UnsupportedOperationException("untagPhoto not yet implemented");
+    String delPhotoTag = """
+        delete from Photo_Tag 
+          where PhotoID = ?
+            and TagID = ?;
+    """;
+    try (Connection con = getConnection();
+         PreparedStatement del = con.prepareStatement(delPhotoTag)) {
+        del.setInt(1, photoId);
+        del.setInt(2, tagId);
+        
+        del.execute();
+    } 
   }
 
   /**
    * Returns all photos that have a given tag.
    */
   public static List<PhotoRecord> getPhotosByTag(int tagId) throws SQLException {
-    // TODO
-    throw new UnsupportedOperationException("getPhotosByTag not yet implemented");
+    String selPhotos = """
+        select P.* 
+        from Photo P join Photo_Tag PT
+          on P.PhotoID = PT.PhotoID
+          where TagID = ?;
+    """;
+    try (Connection con = getConnection();
+         PreparedStatement sel = con.prepareStatement(selPhotos)) {
+        sel.setInt(1, tagId);
+        
+        ResultSet rs = sel.executeQuery();
+        
+        List<PhotoRecord> photos = new ArrayList<>();
+        while (rs.next()) {
+            photos.add(mapPhoto(rs));
+        }
+        return photos;
+    } 
   }
 
   // ResultSet Record mappers to translate raw SQL rows into record types

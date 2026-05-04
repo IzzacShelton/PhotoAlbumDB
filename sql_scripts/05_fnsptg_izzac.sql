@@ -65,6 +65,10 @@ begin
 			(CameraID, Filepath, FileSize, Latitude, Longitude, ImageWidth, ImageHeight, DateTimeTaken)
 		values
 			(c_CameraID, p_Filepath, p_FileSize, p_Latitude, p_Longitude, p_ImageWidth, p_ImageHeight, p_DateTimeTaken);
+	  
+	  select * 
+	  from Photo 
+	  where PhotoID = last_insert_id();
 	commit;
 end $$
 delimiter ;

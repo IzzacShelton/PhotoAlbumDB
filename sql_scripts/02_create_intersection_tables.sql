@@ -1,7 +1,7 @@
 use PhotoApp;
  
 # PhotoTag_Int - Salina
-create table PhotoTag (
+create table Photo_Tag (
     PhotoID int,
     TagID int,
     primary key (PhotoID, TagID),
