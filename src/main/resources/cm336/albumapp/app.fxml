@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="cm336.albumapp.controller.AppController">
+
+    <top>
+        <MenuBar>
+            <menus>
+                <Menu text="File">
+                    <items>
+                        <MenuItem text="Import Photo…"  onAction="#onImportPhoto"/>
+                        <MenuItem text="Import Folder…" onAction="#onImportFolder"/>
+                    </items>
+                </Menu>
+                <Menu text="View">
+                    <items>
+                        <MenuItem text="Albums"  onAction="#onGoHome"/>
+                        <MenuItem text="Tags"    onAction="#onGoTags"/>
+                    </items>
+                </Menu>
+                <Menu text="Appearance">
+                    <items>
+                        <MenuItem text="Cupertino Dark"  onAction="#onThemeDark"/>
+                        <MenuItem text="Cupertino Light" onAction="#onThemeLight"/>
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </top>
+
+    <center>
+        <!-- Views are loaded into here by App.navigate() -->
+        <StackPane fx:id="contentArea"/>
+    </center>
+
+</BorderPane>

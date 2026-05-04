@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="cm336.albumapp.controller.AlbumViewController">
+
+    <top>
+        <ToolBar>
+            <items>
+                <Button text="← Back" onAction="#onBack"/>
+                <Label fx:id="albumTitleLabel"
+                       style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                <Pane HBox.hgrow="ALWAYS"/>
+                <Label text="Filter by tag:"/>
+                <ComboBox fx:id="tagFilterBox"
+                          promptText="All"
+                          onAction="#onFilterChanged"/>
+            </items>
+        </ToolBar>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true">
+            <content>
+                <!-- Photo thumbnail nodes are added here programmatically -->
+                <FlowPane fx:id="photoGrid"
+                          hgap="12" vgap="12"
+                          style="-fx-padding: 16;"/>
+            </content>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

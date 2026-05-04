@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="cm336.albumapp.controller.PhotoViewController">
+
+    <center>
+        <!-- Photo fills available space, preserving aspect ratio -->
+        <ImageView fx:id="photoDisplay"
+                   preserveRatio="true"
+                   fitWidth="800"
+                   fitHeight="620"/>
+    </center>
+
+    <right>
+        <!-- Metadata side panel -->
+        <VBox minWidth="280" maxWidth="320" style="-fx-padding: 8;">
+            <children>
+                <Label text="Metadata" style="-fx-font-weight: bold; -fx-padding: 0 0 8 0;"/>
+                <TreeTableView fx:id="metadataTree" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TreeTableColumn fx:id="metaNameColumn"  text="Tag"   prefWidth="140"/>
+                        <TreeTableColumn fx:id="metaValueColumn" text="Value" prefWidth="140"/>
+                    </columns>
+                </TreeTableView>
+            </children>
+        </VBox>
+    </right>
+
+    <bottom>
+        <ToolBar>
+            <items>
+                <Button text="← Back"    onAction="#onBack"/>
+                <Pane HBox.hgrow="ALWAYS"/>
+                <Label fx:id="photoInfoLabel"/>
+                <Pane HBox.hgrow="ALWAYS"/>
+                <Button text="←"  onAction="#onPrevious"/>
+                <Button text="→"  onAction="#onNext"/>
+            </items>
+        </ToolBar>
+    </bottom>
+
+</BorderPane>

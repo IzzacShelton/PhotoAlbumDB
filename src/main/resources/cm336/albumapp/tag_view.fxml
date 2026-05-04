@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="cm336.albumapp.controller.TagViewController">
+
+    <left>
+        <!-- Tag list panel -->
+        <VBox minWidth="220" maxWidth="260" style="-fx-padding: 8; -fx-spacing: 8;">
+            <children>
+                <Label text="Custom Tags"
+                       style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+                <ListView fx:id="tagList" VBox.vgrow="ALWAYS"/>
+                <HBox spacing="8">
+                    <children>
+                        <TextField fx:id="newTagNameField"
+                                   promptText="New tag name…"
+                                   HBox.hgrow="ALWAYS"/>
+                        <Button text="+" onAction="#onCreateTag"/>
+                    </children>
+                </HBox>
+                <Button text="Delete Selected"
+                        onAction="#onDeleteTag"
+                        maxWidth="Infinity"/>
+            </children>
+        </VBox>
+    </left>
+
+    <center>
+        <ScrollPane fitToWidth="true">
+            <content>
+                <!-- Photos with the selected tag are added here programmatically -->
+                <FlowPane fx:id="tagPhotoGrid"
+                          hgap="12" vgap="12"
+                          style="-fx-padding: 16;"/>
+            </content>
+        </ScrollPane>
+    </center>
+
+</BorderPane>
