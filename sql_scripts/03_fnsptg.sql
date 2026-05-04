@@ -37,13 +37,13 @@ create procedure remove_photo_from_album(
     in p_photoid int
 )
 begin
-    delete from album_photo
+    delete from Album_Photo
     where albumid = p_albumid
       and photoid = p_photoid
       and p_albumid not in (
           select albumid
-          from album
-          where albumname in ('library', 'auto')
+          from Album
+          where albumType in ('library', 'auto')
       );
 end $$
 
@@ -61,13 +61,13 @@ drop trigger if exists album_update;
 delimiter $$
 
 create trigger album_update
-after insert on album_photo
+after insert on Album_Photo
 for each row
 begin
-    update album
-    set albumupdates = current_timestamp
+    update Album
+    set albumupdated = current_timestamp()
     where albumid = new.albumid;
 end $$
 
 delimiter ;
-describe album;
+describe Album;

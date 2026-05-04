@@ -1,3 +1,5 @@
+use PhotoApp;
+
 DELIMITER //
 
 Create Procedure FindOrCreateCamera(
