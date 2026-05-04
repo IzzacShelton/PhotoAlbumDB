@@ -30,6 +30,8 @@ delimiter ;
 
 delimiter $$
 create procedure if not exists sp_InsertPhoto(
+  -- passed from application
+  in u_UserID int,
 	-- Photo data (Some may be null)
 	in p_Filepath varchar(256),
 	in p_FileSize bigint,
@@ -45,7 +47,7 @@ create procedure if not exists sp_InsertPhoto(
 )
 begin 
 	declare c_CameraID int;
-	-- not sure if needed but since this effects multiple tables seems appropriate
+	-- not sure if needed but since this effects multiple tables, seems appropriate
 	declare exit handler for SQLEXCEPTION
 		begin
 			rollback;
@@ -54,12 +56,15 @@ begin
 	start transaction;
 		-- check if a matching Camera exists already
 		if c_Brand is not null and c_Model is not null then
-			call FindOrCreateCamera(c_Brand, c_Model, c_SerialNumber, c_CameraID);
+			call sp_FindOrCreateCamera(c_Brand, c_Model, c_SerialNumber, c_CameraID); -- sets c_CameraID
 		end if;
+	  
+	  -- set user session variable for the trigger 
+	  SET @CurrentUserID = u_UserID;
 		insert into Photo 
-			(CameraID, Filepath, Filesize, Latitude, Longitude, ImageWidth, ImageHeight, DateTimeTaken)
+			(CameraID, Filepath, FileSize, Latitude, Longitude, ImageWidth, ImageHeight, DateTimeTaken)
 		values
-			(c_CameraID, p_Filepath, p_Filesize, p_Latitude, p_Longitude, p_ImageWidth, p_ImageHeight, p_DateTimeTaken);
+			(c_CameraID, p_Filepath, p_FileSize, p_Latitude, p_Longitude, p_ImageWidth, p_ImageHeight, p_DateTimeTaken);
 	commit;
 end $$
 delimiter ;

@@ -1,11 +1,11 @@
 -- Functions ----------
 -- returns the number of photos in a given album
 
-drop function if exists photo_count;
+drop function if exists fn_PhotoCount;
 
 delimiter $$
 
-create function photo_count(album_id int)
+create function fn_PhotoCount(album_id int)
 returns int
 deterministic
 begin
@@ -13,8 +13,8 @@ begin
 
     select count(*)
     into photo_total
-    from album_photo
-    where albumid = album_id;
+    from Album_Photo
+    where AlbumID = album_id;
 
     return photo_total;
 end $$
@@ -28,22 +28,22 @@ purpose is to remove a specific photo from a specific album.
 parameters: albumid, photoid
 validation: ensures the album is not a protected system album, such as 'library' or 'auto', before removing the photo.
 */
-drop procedure if exists remove_photo_from_album;
+drop procedure if exists sp_RemovePhotoFromAlbum;
 
 delimiter $$
 
-create procedure remove_photo_from_album(
+create procedure sp_RemovePhotoFromAlbum(
     in p_albumid int,
     in p_photoid int
 )
 begin
     delete from Album_Photo
-    where albumid = p_albumid
-      and photoid = p_photoid
+    where AlbumID = p_albumid
+      and PhotoID = p_photoid
       and p_albumid not in (
-          select albumid
+          select AlbumID
           from Album
-          where albumType in ('library', 'auto')
+          where AlbumType in ('Library', 'Auto')
       );
 end $$
 
@@ -56,17 +56,17 @@ Trigger Name is album_update
 Purpose is to automatically updates the album's last modified timestamp whenever a new photo is added to an album.
 Event: after insert on album_photo
 */
-drop trigger if exists album_update;
+drop trigger if exists tg_AlbumUpdate;
 
 delimiter $$
 
-create trigger album_update
+create trigger tg_AlbumUpdate
 after insert on Album_Photo
 for each row
 begin
     update Album
     set albumupdated = current_timestamp()
-    where albumid = new.albumid;
+    where AlbumID = new.AlbumID;
 end $$
 
 delimiter ;
