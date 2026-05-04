@@ -15,15 +15,17 @@ import java.util.Arrays;
 import java.util.List;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
+import javafx.scene.control.Menu;
 import javafx.scene.layout.StackPane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
 public class AppController {
-
+    @FXML Menu albumMenu, tagsMenu;
+    
     private static final List<String> IMAGE_EXTENSIONS =
         Arrays.asList(".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp");
-
+    
     @FXML private StackPane contentArea;
 
     public void setContent(Parent view) {
