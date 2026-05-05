@@ -61,7 +61,7 @@ public final class DatabaseManager {
    * Returns all albums owned by the given user.
    */
   public static List<AlbumRecord> getAlbumsForUser(int userId) throws SQLException {
-    String selectAlbums = "select * from Album where OwnerID = ?;";
+    String selectAlbums = "select * from Album where OwnerID = ? order by AlbumType, AlbumName desc;";
     try (Connection con = getConnection(); 
          PreparedStatement sel = con.prepareStatement(selectAlbums);) {
       
@@ -139,9 +139,8 @@ public final class DatabaseManager {
          PreparedStatement sel = con.prepareStatement(selThumb)) {
         sel.setInt(1, albumId);
         ResultSet r = sel.executeQuery();
-        r.next();
         
-        return r.getString("Filepath");
+        return r.next() ? r.getString("Filepath") : null;
     } 
   }
 
@@ -195,12 +194,12 @@ public final class DatabaseManager {
         select P.*
         from 
           Photo P join (
-            select PhotoID, TagID, AlbumID
+            select PT.PhotoID, PT.TagID, AP.AlbumID
             from Album_Photo AP join Photo_Tag PT
             on AP.PhotoID = PT.PhotoID
           ) J on J.PhotoID = P.PhotoID
-        where AlbumID = ?
-          and TagID = ?;
+        where J.AlbumID = ?
+          and J.TagID = ?;
     """;
     try (Connection con = getConnection();
          PreparedStatement sel = con.prepareStatement(selPhoByTag)) {
@@ -214,33 +213,36 @@ public final class DatabaseManager {
         }
         
         return photos;
-    } 
+    }
   }
 
   /**
    * Imports a photo into the database from an extracted PhotoMetadata record.
    */
   public static PhotoRecord importPhoto(PhotoMetadata meta, int userId) throws SQLException {
-    String callIns = "call sp_InsertPhoto(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"; // oh the setters...
+    String callIns = "call sp_InsertPhoto(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", // oh the setters...
+           selPhoto= "select * from Photo where Filepath = ?;";
     
     try (Connection con = getConnection();
-         PreparedStatement ins = con.prepareStatement(callIns)) {
+         PreparedStatement ins = con.prepareStatement(callIns);
+         PreparedStatement sel = con.prepareStatement(selPhoto)) {
         // sp_InsertPhoto(int, String, long, Double, Double, int, int, LocalDateTime, String, String, String); 
-        ins.setInt(1, userId);                  // in u_UserID int,
-        ins.setString(2, meta.filepath());      // in p_Filepath varchar(256),
-        ins.setLong(3, meta.fileSize());        // in p_FileSize bigint,
-        ins.setDouble(4, meta.latitude());      // in p_Latitude decimal(8,6),
-        ins.setDouble(5, meta.longitude());     // in p_Longitude decimal(9,6),
-        ins.setInt(6, meta.imageWidth());       // in p_ImageWidth int unsigned,
-        ins.setInt(7, meta.imageHeight());      // in p_ImageHeight int unsigned,
-        ins.setObject(8, meta.dateTimeTaken()); // in p_DateTimeTaken datetime,
-        ins.setString(8, meta.cameraBrand());   // in c_Brand varchar(100),
-        ins.setString(9, meta.cameraModel());   // in c_Model varchar(100),
-        ins.setString(10, meta.cameraSerial()); // in c_SerialNumber varchar(100)
-
-        // the procedure ends with a select of the new record, so executeQuery should return the row
-        // provided the JDBC behaves... 
-        ResultSet rs = ins.executeQuery();
+        ins.setInt(1, userId);                             // in u_UserID int,
+        ins.setString(2, meta.filepath());                 // in p_Filepath varchar(256),
+        ins.setLong(3, meta.fileSize());                   // in p_FileSize bigint,
+        ins.setObject(4, meta.latitude(), Types.DECIMAL);  // in p_Latitude decimal(8,6),
+        ins.setObject(5, meta.longitude(), Types.DECIMAL); // in p_Longitude decimal(9,6),
+        ins.setInt(6, meta.imageWidth());                  // in p_ImageWidth int unsigned,
+        ins.setInt(7, meta.imageHeight());                 // in p_ImageHeight int unsigned,
+        ins.setObject(8, meta.dateTimeTaken());            // in p_DateTimeTaken datetime,
+        ins.setString(9, meta.cameraBrand());              // in c_Brand varchar(100),
+        ins.setString(10, meta.cameraModel());             // in c_Model varchar(100),
+        ins.setString(11, meta.cameraSerial());            // in c_SerialNumber varchar(100)
+        ins.execute();
+        
+        // select photo by its filepath
+        sel.setString(1, meta.filepath());
+        ResultSet rs = sel.executeQuery();
         rs.next();
         
         return mapPhoto(rs);
@@ -270,13 +272,25 @@ public final class DatabaseManager {
    * Removes a photo from a User album without deleting the Photo row itself.
    */
   public static void removePhotoFromAlbum(int albumId, int photoId) throws SQLException {
-    String callRemove = "{call sp_RemovePhotoFromAlbum(?, ?);}";
+    String callRemove = "call sp_RemovePhotoFromAlbum(?, ?);";
     try (Connection con = getConnection();
-         PreparedStatement call = con.prepareCall(callRemove)) {
+         PreparedStatement call = con.prepareStatement(callRemove)) {
         call.setInt(1, albumId);
         call.setInt(2, photoId);
         
-        call.execute();
+        ResultSet rs = call.executeQuery();
+        System.out.println(rs);
+        PreparedStatement s = con.prepareStatement("select * from Album_Photo where AlbumID = ? and PhotoID = ?;");
+        s.setInt(1, albumId);
+        s.setInt(2, photoId);
+        ResultSet test = s.executeQuery();
+
+        
+        if (test.next()){
+            System.out.println(mapPhoto(test));
+        } else {
+            System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        }
     } 
   }
 
@@ -362,7 +376,29 @@ public final class DatabaseManager {
         ins.execute();
     } 
   }
-
+  /**
+  * Returns all tags applied to a specific photo.
+  */
+  public static List<TagRecord> getTagsForPhoto(int photoId) throws SQLException {
+    String selTags = """
+        select T.* from Tags T join Photo_Tag PT
+          on T.TagID = PT.TagID
+        where PT.PhotoID = ?
+        order by T.Title;
+    """;
+    try (Connection con = getConnection();
+         PreparedStatement sel = con.prepareStatement(selTags)) {
+        sel.setInt(1, photoId);
+        ResultSet rs = sel.executeQuery();
+        
+        List<TagRecord> tags = new ArrayList<>();
+        while (rs.next()) {
+            tags.add(mapTag(rs));
+        }
+        return tags;
+    }
+  }
+  
   /**
    * Removes a tag from a photo.
    */
@@ -380,7 +416,20 @@ public final class DatabaseManager {
         del.execute();
     } 
   }
-
+  
+  /**
+  * Updates the color of an existing tag.
+  */
+  public static void updateTagColor(int tagId, int color) throws SQLException {
+      String updColor = "update Tags set TagColor = ? where TagID = ?;";
+      try (Connection con = getConnection();
+           PreparedStatement upd = con.prepareStatement(updColor)) {
+          upd.setInt(1, color);
+          upd.setInt(2, tagId);
+          upd.execute();
+      }
+  }
+  
   /**
    * Returns all photos that have a given tag.
    */

@@ -15,18 +15,21 @@ import java.util.Arrays;
 import java.util.List;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
-import javafx.scene.control.Menu;
+import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
 public class AppController {
-    @FXML Menu albumMenu, tagsMenu;
-    
     private static final List<String> IMAGE_EXTENSIONS =
-        Arrays.asList(".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp");
+        Arrays.asList(".jpg", ".jpeg", ".png", ".gif", ".bmp");
     
     @FXML private StackPane contentArea;
+    @FXML private Button albumsBtn;
+
+    @FXML
+    public void initialize() {
+    }
 
     public void setContent(Parent view) {
         contentArea.getChildren().setAll(view);
@@ -37,14 +40,11 @@ public class AppController {
         FileChooser fc = new FileChooser();
         fc.setTitle("Import Photo");
         fc.getExtensionFilters().add(
-            new FileChooser.ExtensionFilter("Image Files",
-                "*.jpg", "*.jpeg", "*.png", "*.gif", "*.bmp", "*.tiff", "*.webp")
+            new FileChooser.ExtensionFilter("Image Files", "*.jpg", "*.jpeg", "*.png", "*.gif", "*.bmp")
         );
         fc.setInitialDirectory(new File(System.getProperty("user.home")));
         File file = fc.showOpenDialog(contentArea.getScene().getWindow());
-        if (file != null) {
-            importFile(file);
-        }
+        if (file != null) importFile(file);
     }
 
     @FXML
@@ -56,13 +56,11 @@ public class AppController {
         if (dir == null) return;
 
         File[] files = dir.listFiles(f ->
-            IMAGE_EXTENSIONS.stream().anyMatch(ext ->
-                f.getName().toLowerCase().endsWith(ext)));
+            IMAGE_EXTENSIONS.stream().anyMatch(ext -> f.getName().toLowerCase().endsWith(ext)));
 
         if (files != null) {
             for (File f : files) importFile(f);
         }
-
         App.navigate("album_gallery");
     }
 
@@ -70,7 +68,9 @@ public class AppController {
         try {
             PhotoMetadata meta = MetadataExtractor.extract(file);
             DatabaseManager.importPhoto(meta, Session.getCurrentUser().userId());
-        } catch (IOException | ImageProcessingException | SQLException e) {
+        } catch (IOException | ImageProcessingException e) {
+            System.err.println("Skipped unreadable file: " + file.getName());
+        } catch (SQLException e) {
             e.printStackTrace(System.err);
         }
     }

@@ -5,12 +5,14 @@ import cm336.albumapp.controller.AppController;
 import cm336.albumapp.db.DatabaseManager;
 import cm336.albumapp.model.UserRecord;
 import java.io.IOException;
+import java.io.File;
 import java.sql.SQLException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import java.awt.Desktop;
 
 /**
  * JavaFX application class. Responsible for:
@@ -69,5 +71,15 @@ public class App extends Application {
 
     public static void main(String[] args) {
         launch();
+    }
+    public static void showInExplorer(String filepath) {
+        try {
+            File file = new File(filepath);
+            if (file.exists()) {
+                Desktop.getDesktop().browseFileDirectory(file);
+            }
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+        }
     }
 }

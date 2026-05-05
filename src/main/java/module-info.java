@@ -4,8 +4,9 @@ module cm336.albumapp {
     requires javafx.graphics;
     requires com.drew.metadata;
     requires java.sql;
+    requires java.desktop;
     requires atlantafx.base;
-
+    
     opens cm336.albumapp to javafx.fxml;
     opens cm336.albumapp.controller to javafx.fxml;
 

@@ -1,6 +1,5 @@
 package cm336.albumapp.controller;
 
-import cm336.albumapp.App;
 import cm336.albumapp.Session;
 import cm336.albumapp.db.DatabaseManager;
 import cm336.albumapp.model.PhotoRecord;
@@ -10,17 +9,19 @@ import java.util.List;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
-import javafx.util.StringConverter;
+import javafx.scene.paint.Color;
 
 public class TagViewController {
 
     @FXML private ListView<TagRecord> tagList;
     @FXML private FlowPane tagPhotoGrid;
     @FXML private TextField newTagNameField;
-
+    @FXML private ColorPicker tagColorPicker;
+    
     @FXML
     public void initialize() {
         tagList.setCellFactory(lv -> new javafx.scene.control.ListCell<>() {
@@ -35,11 +36,53 @@ public class TagViewController {
 
         tagList.getSelectionModel().selectedItemProperty().addListener(
             (obs, oldVal, newVal) -> {
-                if (newVal != null) loadPhotosForTag(newVal);
+                if (newVal != null) {
+                    loadPhotosForTag(newVal);
+                    int rgb = newVal.tagColor();
+                    tagColorPicker.setValue(Color.rgb((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF));
+                    tagColorPicker.setDisable(false);
+                } else {
+                    tagColorPicker.setDisable(true);
+                }
             }
         );
+
+        TagRecord sessionTag = Session.getCurrentTag();
+        if (sessionTag != null) {
+            for (TagRecord t : tagList.getItems()) {
+                if (t.tagId() == sessionTag.tagId()) {
+                    tagList.getSelectionModel().select(t);
+                    break;
+                }
+            }
+            Session.setCurrentTag(null); 
+        }
     }
 
+    @FXML
+    private void onColorChanged() {
+        TagRecord selected = tagList.getSelectionModel().getSelectedItem();
+        if (selected == null) return;
+
+        Color c = tagColorPicker.getValue();
+        int rgb = ((int)(c.getRed() * 255) << 16) | 
+                  ((int)(c.getGreen() * 255) << 8) | 
+                  ((int)(c.getBlue() * 255));
+
+        try {
+            DatabaseManager.updateTagColor(selected.tagId(), rgb);
+            loadTags();
+            for (TagRecord t : tagList.getItems()) {
+                if (t.tagId() == selected.tagId()) {
+                    tagList.getSelectionModel().select(t);
+                    break;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace(System.err);
+        }
+    }
+    
     private void loadTags() {
         tagList.getItems().clear();
         try {
@@ -54,10 +97,18 @@ public class TagViewController {
         try {
             List<PhotoRecord> photos = DatabaseManager.getPhotosByTag(tag.tagId());
             for (PhotoRecord photo : photos) {
-                tagPhotoGrid.getChildren().add(new PhotoThumbnail(photo, () -> {
-                    Session.setCurrentPhoto(photo);
-                    App.navigate("photo_view");
-                }));
+                PhotoThumbnail thumb = new PhotoThumbnail(photo, e -> {
+                    try {
+                        DatabaseManager.untagPhoto(photo.photoId(), tag.tagId());
+                        tagPhotoGrid.getChildren().removeIf(
+                            n -> (n instanceof PhotoThumbnail) && ((PhotoThumbnail)n).photoId == photo.photoId()
+                        );
+                    } catch (SQLException ex) {
+                        ex.printStackTrace(System.err);
+                    }
+                });
+
+                tagPhotoGrid.getChildren().add(thumb);
             }
         } catch (SQLException e) {
             e.printStackTrace(System.err);

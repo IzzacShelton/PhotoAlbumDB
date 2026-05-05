@@ -7,7 +7,7 @@ public record AlbumRecord(
     int ownerId,
     String albumName,
     String albumDescription,
-    String albumType,       // ENUM: 'Library', 'User', 'Auto'
+    String albumType,       // ENUM('Library', 'User', 'Auto')
     LocalDateTime createdAt,
     LocalDateTime albumUpdated
 ) {
