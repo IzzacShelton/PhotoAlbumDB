@@ -1,5 +1,6 @@
 # Compiled class file
 *.class
+*.nbactions.xml
 
 # Log file
 *.log
@@ -24,3 +25,10 @@ hs_err_pid*
 replay_pid*
 
 **/target
+
+*.png
+*.jpg
+*.jpeg
+*.bmp
+*.gif
+*.heic

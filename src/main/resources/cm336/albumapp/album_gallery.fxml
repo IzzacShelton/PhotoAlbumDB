@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+
+<BorderPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cm336.albumapp.controller.AlbumGalleryController">
+
+    <top>
+        <ToolBar>
+            <items>
+                <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Albums" />
+                <Pane HBox.hgrow="ALWAYS" />
+                <TextField fx:id="newAlbumNameField" promptText="New album name…" />
+                <Button onAction="#onCreateAlbum" text="+ New Album" />
+            </items>
+        </ToolBar>
+    </top>
+
+    <center>
+      <SplitPane dividerPositions="0.5">
+         <items>
+            <ScrollPane fitToWidth="true" minWidth="180.0">
+               <content>
+                  <FlowPane fx:id="autoAlbumGrid" hgap="16" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-padding: 16;" vgap="16" />
+               </content>
+            </ScrollPane>
+              <ScrollPane fitToWidth="true" minWidth="180.0">
+                  <content>
+                      <!-- Album card nodes are added here programmatically -->
+                      <FlowPane fx:id="userAlbumGrid" hgap="16" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-padding: 16;" vgap="16" />
+                  </content>
+              </ScrollPane>
+         </items>
+      </SplitPane>
+    </center>
+
+</BorderPane>

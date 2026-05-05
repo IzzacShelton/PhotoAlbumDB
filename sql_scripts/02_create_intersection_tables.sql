@@ -1,7 +1,7 @@
 use PhotoApp;
  
 # PhotoTag_Int - Salina
-create table PhotoTag (
+create table Photo_Tag (
     PhotoID int,
     TagID int,
     primary key (PhotoID, TagID),
@@ -12,7 +12,7 @@ create table PhotoTag (
 
 # AlbumPhoto_Int - Emily
 Create table Album_Photo (
-  AlbumID INT on delete cascade, 
+  AlbumID INT, 
   PhotoID int,
   primary key (AlbumID, PhotoID),
   foreign key (AlbumID) References Album(AlbumID)

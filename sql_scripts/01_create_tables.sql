@@ -16,7 +16,8 @@ create table Users (
 	Name varchar(100) not null,
 	Email varchar(100) null,
 	DateJoined datetime default current_timestamp(),
-	constraint users_pk primary key (UserId)
+	constraint users_pk primary key (UserId),
+	constraint user_name_uk unique (Name)
 );
 
 # create the camera table
