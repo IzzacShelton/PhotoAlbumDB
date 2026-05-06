@@ -1,3 +1,5 @@
+use PhotoApp;
+
 DELIMITER $$
 CREATE FUNCTION if not exists fn_GetYearAlbumID (
     p_UserID INT,
@@ -32,16 +34,13 @@ BEGIN
 
     -- Get user from session (set in sp_InsertPhoto)
     SET v_UserID = @CurrentUserID;
-
     -- Check userID valid
     IF v_UserID IS NULL THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'UserID not set before inserting photo';
     END IF;
-
     -- Get year
     SET v_Year = YEAR(COALESCE(NEW.DateTimeTaken, NOW()));
-    
     -- Library album
     SELECT fn_GetLibraryID(@CurrentUserID) INTO v_LibraryAlbumID;
 
@@ -51,7 +50,6 @@ BEGIN
 
         SET v_LibraryAlbumID = LAST_INSERT_ID();
     END IF;
-    
     -- Year album
     SELECT fn_GetYearAlbumID(@CurrentUserID, v_Year) INTO v_YearAlbumID;
 
@@ -60,14 +58,11 @@ BEGIN
         VALUES (v_UserID, CONCAT(v_Year, ' Photos'), 'Auto');
         SET v_YearAlbumID = LAST_INSERT_ID();
     END IF;
-
     -- Insert into junction table
     INSERT IGNORE INTO Album_Photo (AlbumID, PhotoID)
     VALUES (v_LibraryAlbumID, NEW.PhotoID);
-
     INSERT IGNORE INTO Album_Photo (AlbumID, PhotoID)
     VALUES (v_YearAlbumID, NEW.PhotoID);
-
 END $$
 DELIMITER ;
 

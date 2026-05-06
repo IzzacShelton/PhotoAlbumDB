@@ -22,6 +22,7 @@ public class AlbumGalleryController {
     @FXML
     public void initialize() {
         loadAlbums();
+        newAlbumNameField.setOnAction((e) -> onCreateAlbum());
     }
 
     private void loadAlbums() {

@@ -284,13 +284,6 @@ public final class DatabaseManager {
         s.setInt(1, albumId);
         s.setInt(2, photoId);
         ResultSet test = s.executeQuery();
-
-        
-        if (test.next()){
-            System.out.println(mapPhoto(test));
-        } else {
-            System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-        }
     } 
   }
 

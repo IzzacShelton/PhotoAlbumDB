@@ -57,6 +57,10 @@ public class TagViewController {
             }
             Session.setCurrentTag(null); 
         }
+
+        newTagNameField.setOnAction((e) -> {
+          onCreateTag();
+        });
     }
 
     @FXML

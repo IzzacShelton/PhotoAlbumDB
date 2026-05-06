@@ -5,7 +5,8 @@ create table Photo_Tag (
     PhotoID int,
     TagID int,
     primary key (PhotoID, TagID),
-    foreign key (PhotoID) references Photo(PhotoID),
+    foreign key (PhotoID) references Photo(PhotoID)
+      on delete cascade,
     foreign key (TagID) references Tags(TagID)
       on delete cascade
 );
@@ -18,6 +19,7 @@ Create table Album_Photo (
   foreign key (AlbumID) References Album(AlbumID)
   	on delete cascade,
   foreign key (PhotoID) References Photo(PhotoID)
+    on delete cascade
 );
 
 # AlbumShares - Izzac
