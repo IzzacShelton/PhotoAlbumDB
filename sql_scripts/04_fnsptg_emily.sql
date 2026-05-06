@@ -43,12 +43,9 @@ BEGIN
     SET v_Year = YEAR(COALESCE(NEW.DateTimeTaken, NOW()));
     -- Library album
     SELECT fn_GetLibraryID(@CurrentUserID) INTO v_LibraryAlbumID;
-
     IF v_LibraryAlbumID IS NULL THEN
-        INSERT INTO Album (OwnerID, AlbumName, CreatedAt)
-        VALUES (v_UserID, 'Library', NOW());
-
-        SET v_LibraryAlbumID = LAST_INSERT_ID();
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'No Library Album found';
     END IF;
     -- Year album
     SELECT fn_GetYearAlbumID(@CurrentUserID, v_Year) INTO v_YearAlbumID;

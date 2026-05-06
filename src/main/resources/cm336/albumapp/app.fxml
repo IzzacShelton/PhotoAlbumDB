@@ -4,6 +4,7 @@
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
@@ -25,6 +26,8 @@
                 <Button onAction="#onGoTags" style="-fx-cursor: hand;" text="Tags" />
 
                 <Pane HBox.hgrow="ALWAYS" />
+
+                <ComboBox fx:id="userSelector" promptText="Switch User" />
 
                 <MenuButton text="Appearance">
                     <items>

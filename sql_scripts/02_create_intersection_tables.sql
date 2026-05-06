@@ -23,19 +23,19 @@ Create table Album_Photo (
 );
 
 # AlbumShares - Izzac
-CREATE TABLE AlbumShares(
+create table Album_Shares(
   ReceiverID int,
   AlbumID int,
   
-  PRIMARY KEY (ReceiverID, AlbumID),
+  primary key (ReceiverID, AlbumID),
   
-  FOREIGN KEY (ReceiverID) 
-    REFERENCES Users(UserID),
-  FOREIGN KEY (AlbumID)
-    REFERENCES Album(AlbumID)
+  foreign key (ReceiverID) 
+    references Users(UserID)
+       on delete cascade,
+  foreign key (AlbumID)
+    references Album(AlbumID)
+       on delete cascade
 );
-
-
 
 
 

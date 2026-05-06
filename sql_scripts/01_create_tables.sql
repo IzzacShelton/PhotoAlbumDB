@@ -60,6 +60,8 @@ CREATE TABLE Album (
 
 	FOREIGN KEY (OwnerID)
 		REFERENCES Users(UserID)
+			on delete cascade
+			on update cascade
 );
 
 # display the table structures

@@ -72,5 +72,3 @@ begin
 	commit;
 end $$
 delimiter ;
-
-

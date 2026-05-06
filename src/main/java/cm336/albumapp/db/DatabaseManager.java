@@ -423,6 +423,20 @@ public final class DatabaseManager {
       }
   }
   
+  public static List<UserRecord> getAllUsers() throws SQLException {
+    String selUsers = "select * from Users order by Name;";
+    try (Connection con = getConnection();
+         PreparedStatement sel = con.prepareStatement(selUsers)) {
+        ResultSet rs = sel.executeQuery();
+        
+        List<UserRecord> users = new ArrayList<>();
+        while (rs.next()) {
+            users.add(mapUser(rs));
+        }
+        
+        return users;
+    }
+  }
   /**
    * Returns all photos that have a given tag.
    */
