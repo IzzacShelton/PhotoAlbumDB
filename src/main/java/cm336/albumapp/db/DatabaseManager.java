@@ -278,12 +278,7 @@ public final class DatabaseManager {
         call.setInt(1, albumId);
         call.setInt(2, photoId);
         
-        ResultSet rs = call.executeQuery();
-        System.out.println(rs);
-        PreparedStatement s = con.prepareStatement("select * from Album_Photo where AlbumID = ? and PhotoID = ?;");
-        s.setInt(1, albumId);
-        s.setInt(2, photoId);
-        ResultSet test = s.executeQuery();
+        call.execute();
     } 
   }
 
