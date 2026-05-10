@@ -75,7 +75,7 @@ Begin
     -- Try to find existing camera using SerialNumber
     SELECT CameraID INTO p_CameraID
     FROM Camera
-    WHERE SerialNumber <=> p_SerialNumber
+    WHERE (SerialNumber <=> p_SerialNumber AND p_SerialNumber IS NOT NULL)
       OR (Brand = p_Brand AND Model = p_Model)
     LIMIT 1;
 
@@ -84,7 +84,11 @@ Begin
         INSERT INTO Camera (Brand, Model, SerialNumber)
         VALUES (p_Brand, p_Model, p_SerialNumber);
         -- Get the new CameraID
-        SET p_CameraID = LAST_INSERT_ID();
+        select CameraID into p_CameraID 
+        from Camera 
+        where Brand <=> p_Brand 
+    	  and Model <=> p_Model 
+          and SerialNumber <=> p_SerialNumber;
     END IF;
 END //
 DELIMITER ;

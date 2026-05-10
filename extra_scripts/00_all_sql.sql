@@ -195,7 +195,7 @@ Begin
     -- Try to find existing camera using SerialNumber
     SELECT CameraID INTO p_CameraID
     FROM Camera
-    WHERE SerialNumber <=> p_SerialNumber
+    WHERE (SerialNumber <=> p_SerialNumber AND p_SerialNumber IS NOT NULL)
       OR (Brand = p_Brand AND Model = p_Model)
     LIMIT 1;
 
@@ -204,7 +204,11 @@ Begin
         INSERT INTO Camera (Brand, Model, SerialNumber)
         VALUES (p_Brand, p_Model, p_SerialNumber);
         -- Get the new CameraID
-        SET p_CameraID = LAST_INSERT_ID();
+        select CameraID into p_CameraID 
+        from Camera 
+        where Brand <=> p_Brand 
+    	  and Model <=> p_Model 
+          and SerialNumber <=> p_SerialNumber;
     END IF;
 END $$
 DELIMITER ;
@@ -568,12 +572,12 @@ insert into Album_Shares (ReceiverID, AlbumID)
 
 # inserts from data_queries_izzac.sql
 insert into Users (Name) 
-	values ('Izzac'), ('Alice'), ('Brandon'), ('Bob'), ('Eve'), ('soms');
+	values ('Izzac'), ('Alice'), ('Brandon'), ('Bob'), ('Eve');
 
-select UserID into @pcUserID
+select UserID into @izzacID
 from Users 
-where Name = 'soms';
-select @pcUserID;
+where Name = 'Izzac';
+select @izzacID;
 
 insert ignore into Camera (Brand, Model, SerialNumber) 
 	values ('Google', 'Pixel 10', NULL),
@@ -590,35 +594,35 @@ insert into Tags (Title, TagColor, TagType)
 		('Zox',	    0xBEEEEF, 'Custom'),
 		('Old Pics',0xFF00FF, 'Custom'); 
 
-call sp_InsertPhoto(@pcUserID, '/home/soms/Vault/DBMS Project Photos/Izzac/20260502_153441Z.jpg', 
+call sp_InsertPhoto(@izzacID, '/home/soms/Vault/DBMS Project Photos/Izzac/20260502_153441Z.jpg', 
 	6219023, NULL, NULL, 4000, 3000, '2026-05-02 10:34:41', 
 	'Google', 'Pixel 10', NULL);
 
-call sp_InsertPhoto(@pcUserID, '/home/soms/Vault/DBMS Project Photos/Izzac/20260502_153450Z.jpg', 
+call sp_InsertPhoto(@izzacID, '/home/soms/Vault/DBMS Project Photos/Izzac/20260502_153450Z.jpg', 
 	5226087, NULL, NULL, 4000, 3000, '2026-05-02 10:34:50', 
 	'Google', 'Pixel 10', NULL);
 
-call sp_InsertPhoto(@pcUserID, '/home/soms/Vault/DBMS Project Photos/Izzac/Zox/20171225_052343250_iOS-X4.jpg', 
+call sp_InsertPhoto(@izzacID, '/home/soms/Vault/DBMS Project Photos/Izzac/Zox/20171225_052343250_iOS-X4.jpg', 
 	914784, NULL, NULL, 2048, 1872, '2017-12-24 21:23:43', 
 	'Apple', 'iPhone 6s', NULL);
 
-call sp_InsertPhoto(@pcUserID, '/home/soms/Vault/DBMS Project Photos/Izzac/Zox/IMG_0764.jpg', 
+call sp_InsertPhoto(@izzacID, '/home/soms/Vault/DBMS Project Photos/Izzac/Zox/IMG_0764.jpg', 
 	305595, 45.480800, -122.388725, 1942, 1944, '2016-05-13 12:17:32', 
 	'Apple', 'iPhone 6s', NULL);
 
-call sp_InsertPhoto(@pcUserID, '/home/soms/Vault/DBMS Project Photos/Izzac/Zox/zox.jpg', 
+call sp_InsertPhoto(@izzacID, '/home/soms/Vault/DBMS Project Photos/Izzac/Zox/zox.jpg', 
 	661589, NULL, NULL, 1814, 1617, '2007-10-16 21:33:22', 
 	NULL, NULL, NULL);
 
-call sp_InsertPhoto(@pcUserID, '/home/soms/Vault/DBMS Project Photos/Izzac/Zox/DSC_0962MOD-X4.jpg', 
+call sp_InsertPhoto(@izzacID, '/home/soms/Vault/DBMS Project Photos/Izzac/Zox/DSC_0962MOD-X4.jpg', 
 	462539, NULL, NULL, 2048, 1360, '2009-12-06 21:24:09', 
 	'NIKON CORPORATION', 'NIKON D300', NULL);
 
-call sp_InsertPhoto(@pcUserID, '/home/soms/Vault/DBMS Project Photos/Izzac/Zox/DSC_3874_1861-X4.jpg', 
+call sp_InsertPhoto(@izzacID, '/home/soms/Vault/DBMS Project Photos/Izzac/Zox/DSC_3874_1861-X4.jpg', 
 	183621, NULL, NULL, 2048, 2044, '2010-06-16 11:41:11', 
 	'NIKON CORPORATION', 'NIKON D300', NULL);
 
-call sp_InsertPhoto(@pcUserID, '/home/soms/Vault/DBMS Project Photos/Izzac/Some Flowers/2021042419182066--8274272085398414930-F76FFEA3-55B4-418F-B79D-40ECB3B4C878-X4.jpg', 
+call sp_InsertPhoto(@izzacID, '/home/soms/Vault/DBMS Project Photos/Izzac/Some Flowers/2021042419182066--8274272085398414930-F76FFEA3-55B4-418F-B79D-40ECB3B4C878-X4.jpg', 
 	220092, NULL, NULL, 1639, 2048, '2021-04-24 11:13:19', 
 	'Apple', 'iPhone XR', NULL);
 
