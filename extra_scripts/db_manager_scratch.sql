@@ -55,6 +55,8 @@ use PhotoApp;
 # importPhoto(meta, userId): 
 -- sp_InsertPhoto(UserID, p_Filepath, p_FileSize, p_Latitude, p_Longitude, p_ImageWidth, p_ImageHeight, p_DateTimeTaken, c_Brand, c_Model, c_SerialNumber);
 -- call sp_InsertPhoto(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+CALL sp_InsertPhoto(@uservariable, '/home/soms/Vault/DBMS Project Photos/IMG_4850.jpeg',
+	2988641, NULL, NULL, 4032, 3024, '2024-04-20 18:53:09', 'Apple', 'iPhone 11', NULL);
 
 # addPhotoToAlbum(albumId, photoId): 
 -- insert ignore into Album_Photo (AlbumID, PhotoID)
@@ -75,7 +77,7 @@ use PhotoApp;
 -- select * from Tags
 -- where TagID = last_insert_id();
 
-# deleteTag(tagId): 
+# deleteTag(tagId):
 -- delete from Tags 
 -- where TagID = ?;
 

@@ -278,19 +278,7 @@ public final class DatabaseManager {
         call.setInt(1, albumId);
         call.setInt(2, photoId);
         
-        ResultSet rs = call.executeQuery();
-        System.out.println(rs);
-        PreparedStatement s = con.prepareStatement("select * from Album_Photo where AlbumID = ? and PhotoID = ?;");
-        s.setInt(1, albumId);
-        s.setInt(2, photoId);
-        ResultSet test = s.executeQuery();
-
-        
-        if (test.next()){
-            System.out.println(mapPhoto(test));
-        } else {
-            System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-        }
+        call.execute();
     } 
   }
 
@@ -430,6 +418,20 @@ public final class DatabaseManager {
       }
   }
   
+  public static List<UserRecord> getAllUsers() throws SQLException {
+    String selUsers = "select * from Users order by Name;";
+    try (Connection con = getConnection();
+         PreparedStatement sel = con.prepareStatement(selUsers)) {
+        ResultSet rs = sel.executeQuery();
+        
+        List<UserRecord> users = new ArrayList<>();
+        while (rs.next()) {
+            users.add(mapUser(rs));
+        }
+        
+        return users;
+    }
+  }
   /**
    * Returns all photos that have a given tag.
    */

@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cm336.albumapp.controller.TagViewController">
+<BorderPane xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cm336.albumapp.controller.TagViewController">
 
     <left>
         <!-- Tag list panel -->
@@ -21,7 +21,7 @@
                 <ListView fx:id="tagList" VBox.vgrow="ALWAYS" />
                 <HBox spacing="8">
                     <children>
-                        <TextField fx:id="newTagNameField" promptText="New tag name…" HBox.hgrow="ALWAYS" />
+                        <TextField fx:id="newTagNameField" onAction="#onCreateTag" promptText="New tag name…" HBox.hgrow="ALWAYS" />
                         <Button onAction="#onCreateTag" text="+" />
                     </children>
                 </HBox>
